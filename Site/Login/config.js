@@ -75,7 +75,7 @@ const SUPABASE_CONFIG = {
     SUPABASE_URL: 'https://khkqwgetapexehhyswqj.supabase.co',
     
     // Cole sua anon/public key aqui
-    SUPABASE_ANON_KEY: 'sb_publishable_GwCkMxsArGDkfEwqZDu6Wg_wWc6ig8J'
+    SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtoa3F3Z2V0YXBleGVoaHlzd3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NjUwMzIsImV4cCI6MjA4MTA0MTAzMn0.5DxSQEWj9fEzMbu4ENmBeYCE3OLbD9QiADaT2Ep2YK8'
 };
 
 // ================================================================================
