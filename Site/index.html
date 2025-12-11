@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Clube - Login / Registro</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{color-scheme: dark}
+    body{background:#0f1115;color:#e6eef8;font-family:Inter,Arial;margin:0;padding:20px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .card{background:#0b0d10;border:1px solid #1f2937;padding:20px;border-radius:10px;width:100%;max-width:520px;box-shadow:0 6px 30px rgba(0,0,0,0.6)}
+    h1{margin:0 0 10px;font-size:20px}
+    input,button,textarea{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #1f2937;background:#071019;color:#e6eef8}
+    button{cursor:pointer;background:#0ea5a4;border:none}
+    .row{display:flex;gap:10px}
+    .small{font-size:13px;color:#99a0b0}
+    label{font-size:13px;color:#9fb0c8}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Bem-vindo ao site do clube</h1>
+    <div id="authWrap">
+      <p class="small">Você precisa de um <strong>código de acesso</strong> fornecido pelo administrador para se registrar.</p>
+      <label>Código de acesso</label>
+      <input id="code" placeholder="Código de acesso (fornecido pelo clube)">
+      <label>Escolha um nome de usuário</label>
+      <input id="username" placeholder="ex: jogador123">
+      <label>Escolha uma senha</label>
+      <input id="password" type="password" placeholder="senha">
+      <div class="row">
+        <button id="btnRegister">Registrar</button>
+        <button id="btnLogin">Entrar</button>
+      </div>
+      <p id="msg" class="small"></p>
+    </div>
+    <div id="memberWrap" style="display:none">
+      <h2>Formulário do jogador</h2>
+      <p class="small">Preencha os dados e envie. Você pode editar depois.</p>
+      <label>Qual seu level</label>
+      <input id="level" type="number" value="0">
+      <label>Posição (gk, df, mc, pt, fw)</label>
+      <input id="posicao" placeholder="Ex: mc">
+      <label>Habilidades</label>
+      <input id="habilidades">
+      <label>Nome do Discord</label>
+      <input id="discord">
+      <label>Posições diversas</label>
+      <input id="posicoesExtras">
+      <label>Descreva como você joga</label>
+      <textarea id="descricao" rows="4"></textarea>
+      <label>Link da imagem do status</label>
+      <input id="statusImg" placeholder="URL imagem">
+      <div class="row">
+        <button id="btnSave">Salvar</button>
+        <button id="btnLogout">Sair</button>
+      </div>
+      <p id="saveMsg" class="small"></p>
+    </div>
+  </div>
+
+<script>
+let token = localStorage.getItem('token') || '';
+const msg = document.getElementById('msg');
+
+async function api(path, opts={}) {
+  opts.headers = opts.headers || {};
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(path, opts);
+  return res.json();
+}
+
+document.getElementById('btnRegister').onclick = async () => {
+  const code = document.getElementById('code').value.trim();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  if (!code || !username || !password) return msg.textContent = 'Preencha todos os campos.';
+  const j = await api('/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password, access_code: code })});
+  if (j.ok) { token = j.token; localStorage.setItem('token', token); showMember(); }
+  else msg.textContent = j.err || 'Erro ao registrar';
+};
+
+document.getElementById('btnLogin').onclick = async () => {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  if (!username || !password) return msg.textContent = 'Digite usuário e senha.';
+  const j = await api('/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password })});
+  if (j.ok) { token = j.token; localStorage.setItem('token', token); showMember(); }
+  else msg.textContent = j.err || 'Erro ao logar';
+};
+
+async function showMember() {
+  document.getElementById('authWrap').style.display='none';
+  document.getElementById('memberWrap').style.display='block';
+  const j = await api('/me/submission');
+  if (j.ok && j.submission) {
+    document.getElementById('level').value = j.submission.level || 0;
+    document.getElementById('posicao').value = j.submission.posicao || '';
+    document.getElementById('habilidades').value = j.submission.habilidades || '';
+    document.getElementById('discord').value = j.submission.discord || '';
+    document.getElementById('posicoesExtras').value = j.submission.posicoes_extras || '';
+    document.getElementById('descricao').value = j.submission.descricao || '';
+    document.getElementById('statusImg').value = j.submission.status_img || '';
+  }
+}
+
+document.getElementById('btnSave').onclick = async () => {
+  const payload = {
+    level: Number(document.getElementById('level').value)||0,
+    posicao: document.getElementById('posicao').value,
+    habilidades: document.getElementById('habilidades').value,
+    discord: document.getElementById('discord').value,
+    posicoesExtras: document.getElementById('posicoesExtras').value,
+    descricao: document.getElementById('descricao').value,
+    statusImg: document.getElementById('statusImg').value
+  };
+  const j = await api('/submit', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  if (j.ok) { document.getElementById('saveMsg').textContent='Salvo com sucesso.'; }
+  else document.getElementById('saveMsg').textContent = j.err || 'Erro ao salvar';
+};
+
+document.getElementById('btnLogout').onclick = () => {
+  token=''; localStorage.removeItem('token');
+  document.getElementById('authWrap').style.display='block';
+  document.getElementById('memberWrap').style.display='none';
+  document.getElementById('msg').textContent='';
+};
+
+// on load: if token exists, try to show member
+if (token) showMember();
+</script>
+</body>
+</html>

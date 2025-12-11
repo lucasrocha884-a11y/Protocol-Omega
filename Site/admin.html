@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Painel Admin - Clube</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{color-scheme: dark}
+    body{background:#0b0d10;color:#cfe8ff;font-family:Inter,Arial;margin:0;padding:20px}
+    .wrap{max-width:1100px;margin:auto}
+    .card{background:#071019;padding:16px;border-radius:10px;border:1px solid #1f2937}
+    input,button,textarea,select{padding:8px;margin:6px 0;border-radius:6px;border:1px solid #1f2937;background:#071019;color:#e6eef8;width:100%}
+    .row{display:flex;gap:10px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    button.primary{background:#0ea5a4;border:none;color:#051015;padding:10px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Painel Admin</h1>
+    <div class="card">
+      <h3>Criar admin (uma vez)</h3>
+      <p class="small">Use a senha ADMIN_PASSWORD (definida nas variáveis de ambiente) para criar o primeiro usuário admin.</p>
+      <input id="admUser" placeholder="username (ex: admin)">
+      <input id="admPass" placeholder="password (ex: suaSenha)">
+      <button id="btnCreateAdmin" class="primary">Criar Admin (one-time)</button>
+      <p id="admMsg" class="small"></p>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="card">
+      <h3>Login Admin</h3>
+      <input id="aUser" placeholder="username">
+      <input id="aPass" placeholder="password">
+      <button id="btnLoginAdmin" class="primary">Entrar</button>
+      <p id="loginMsg" class="small"></p>
+    </div>
+
+    <div id="adminArea" style="display:none">
+      <div class="card">
+        <h3>Gerar código de acesso</h3>
+        <input id="codeMeta" placeholder="meta (opcional, ex: membro fulano)">
+        <button id="btnGen" class="primary">Gerar código</button>
+        <p id="genMsg" class="small"></p>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="card">
+        <h3>Códigos existentes</h3>
+        <pre id="codesList" style="max-height:200px;overflow:auto"></pre>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="card">
+        <h3>Submissões</h3>
+        <pre id="subsList" style="max-height:400px;overflow:auto"></pre>
+      </div>
+    </div>
+  </div>
+
+<script>
+let adminToken='';
+
+async function api(path, opts={}) {
+  opts.headers = opts.headers || {};
+  if (adminToken) opts.headers['Authorization'] = 'Bearer ' + adminToken;
+  const res = await fetch(path, opts);
+  return res.json();
+}
+
+document.getElementById('btnCreateAdmin').onclick = async () => {
+  const u=document.getElementById('admUser').value.trim();
+  const p=document.getElementById('admPass').value.trim();
+  const admin_password = prompt('Insira ADMIN_PASSWORD (definida no servidor):');
+  if (!admin_password) return document.getElementById('admMsg').textContent='Senha admin necessária.';
+  const j = await fetch('/admin/create-admin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, password: p, admin_password })});
+  const r = await j.json();
+  if (r.ok) document.getElementById('admMsg').textContent = 'Admin criado: ' + r.username;
+  else document.getElementById('admMsg').textContent = r.err || 'Erro';
+};
+
+document.getElementById('btnLoginAdmin').onclick = async () => {
+  const u=document.getElementById('aUser').value.trim();
+  const p=document.getElementById('aPass').value.trim();
+  const j = await fetch('/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, password: p })});
+  const r = await j.json();
+  if (r.ok) { adminToken = r.token; document.getElementById('loginMsg').textContent='Logado.'; document.getElementById('adminArea').style.display='block'; loadCodes(); loadSubs();}
+  else document.getElementById('loginMsg').textContent = r.err || 'Erro';
+};
+
+document.getElementById('btnGen').onclick = async () => {
+  const meta = document.getElementById('codeMeta').value.trim();
+  const j = await api('/admin/create-code', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ meta })});
+  if (j.ok) { document.getElementById('genMsg').textContent = 'Código: ' + j.code; loadCodes(); }
+  else document.getElementById('genMsg').textContent = j.err || 'Erro';
+};
+
+async function loadCodes() {
+  const j = await api('/admin/codes');
+  if (j.ok) document.getElementById('codesList').textContent = JSON.stringify(j.codes, null, 2);
+  else document.getElementById('codesList').textContent = j.err || 'erro';
+}
+
+async function loadSubs() {
+  const j = await api('/admin/submissions');
+  if (j.ok) document.getElementById('subsList').textContent = JSON.stringify(j.submissions, null, 2);
+  else document.getElementById('subsList').textContent = j.err || 'erro';
+}
+</script>
+</body>
+</html>
