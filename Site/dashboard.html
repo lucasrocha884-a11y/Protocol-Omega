@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol Omega 3.0 - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="storage.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Efeitos de fundo neon -->
+        <div class="background-effects">
+            <div class="blur-circle blur-circle-1"></div>
+            <div class="blur-circle blur-circle-2"></div>
+        </div>
+        
+        <!-- Container do Dashboard -->
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <div>
+                    <h2>🎮 Protocol Omega 3.0</h2>
+                    <p class="admin-subtitle">Dashboard do Jogador</p>
+                </div>
+                <button id="btnLogout" class="btn-logout">
+                    <i data-lucide="log-out"></i>
+                    Sair
+                </button>
+            </div>
+
+            <!-- Informações do jogador -->
+            <div class="player-info">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <div class="info-content">
+                        <p class="info-label">Discord</p>
+                        <p class="info-value" id="playerDiscord">-</p>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i data-lucide="gamepad-2"></i>
+                    </div>
+                    <div class="info-content">
+                        <p class="info-label">Roblox</p>
+                        <p class="info-value" id="playerRoblox">-</p>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i data-lucide="zap"></i>
+                    </div>
+                    <div class="info-content">
+                        <p class="info-label">Nível</p>
+                        <p class="info-value" id="playerLvl">-</p>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i data-lucide="target"></i>
+                    </div>
+                    <div class="info-content">
+                        <p class="info-label">Posição Principal</p>
+                        <p class="info-value" id="playerPosition">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de edição de nível -->
+            <div class="edit-level-section">
+                <h3>⚡ Atualizar Seu Nível</h3>
+                <p class="section-description">Use o slider abaixo para ajustar seu nível de habilidade</p>
+                
+                <div class="level-editor">
+                    <div class="level-display-large">
+                        <span class="level-label">NÍVEL ATUAL</span>
+                        <span class="level-value" id="currentLvl">1</span>
+                    </div>
+                    
+                    <div class="level-slider-container">
+                        <div class="lvl-bar">
+                            <div class="lvl-bar-fill" id="lvlBarFillEdit" style="width: 1%"></div>
+                        </div>
+                        <input type="range" id="lvlSliderEdit" min="1" max="99" value="1" class="lvl-slider">
+                        <div class="lvl-markers">
+                            <span>1</span>
+                            <span>25</span>
+                            <span>50</span>
+                            <span>75</span>
+                            <span>99</span>
+                        </div>
+                    </div>
+                    
+                    <button id="btnUpdateLevel" class="btn-update">
+                        <i data-lucide="save"></i>
+                        Salvar Nível
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Posições e descrição -->
+            <div class="player-details">
+                <div class="detail-card">
+                    <h4>
+                        <i data-lucide="users"></i>
+                        Posições Jogáveis
+                    </h4>
+                    <div class="positions-list" id="positionsList">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <h4>
+                        <i data-lucide="file-text"></i>
+                        Descrição do Jogo
+                    </h4>
+                    <p id="gameDescription">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
